@@ -1,3 +1,7 @@
+var screen = "start";
+
+var message = "";
+
 var xVel = 0;
 var yVel = 0;
 var xPos = 0;
@@ -62,135 +66,218 @@ function setup() {
     imageMode(CENTER);
     rectMode(CENTER);
     angleMode(DEGREES);
-    xPos = 50;
-    yPos = 50;
-    xVel = 0.5;
 }
 
 function draw() {
-    background(0);
-    push();
-    fill(0);
-    stroke(255);
-    beginShape();
-    for (let i = 0; i < terrain.length - 1; i++) {
-        let p1 = terrain[i];
-        let p2 = terrain[i + 1];
+    switch (screen) {
+        case "start":
+            background(0);
 
-        if (p1.pad && p2.pad && p1.y === p2.y) {
-            stroke("lime"); // highlight pad
-            strokeWeight(3);
-        } else {
+            push();
+            fill("white");
+            textSize(50)
+            textAlign(CENTER);
+            textFont(bender);
+            text("LUNAR LANDER", width / 2, height / 2 - 150);
+            pop();
+
+            push();
+            fill("white");
+            textSize(30)
+            textAlign(CENTER);
+            textFont(bender);
+            text("You are an astronaut controlling a lunar descent vehicle remotely from earth.", width / 2, height / 2 - 75);
+            pop();
+
+            push();
+            fill("white");
+            textSize(30)
+            textAlign(CENTER);
+            textFont(bender);
+            text("Guide the craft safely to a green landing pad, while maintaining a low speed and keeping the craft upright.", width / 2, height / 2 - 25);
+            pop();
+
+            push();
+            fill("white");
+            textSize(30)
+            textAlign(CENTER);
+            textFont(bender);
+            text("Signal transmission delay to the Moon causes all control inputs to arrive 500ms late.", width / 2, height / 2 + 25);
+            pop();
+
+            push();
+            fill("white");
+            textSize(30)
+            textAlign(CENTER);
+            textFont(bender);
+            text("Controls: up arrow to thrust, left and right arrows to rotate.", width / 2, height / 2 + 75);
+            pop();
+
+            push();
+            fill("white");
+            textSize(40)
+            textAlign(CENTER);
+            textFont(bender);
+            text("SPACE TO PLAY", width / 2, height / 2 + 175);
+            pop();
+
+            if (keyIsDown(32)) {
+                screen = "game";
+                xPos = 50;
+                yPos = 50;
+                xVel = 0.5;
+            }
+            break;
+        case "game":
+            background(0);
+            push();
+            fill(0);
             stroke(255);
-            strokeWeight(1);
-        }
+            beginShape();
+            for (let i = 0; i < terrain.length - 1; i++) {
+                let p1 = terrain[i];
+                let p2 = terrain[i + 1];
 
-        line(p1.x * 14, 8 * p1.y + height,
-            p2.x * 14, 8 * p2.y + height);
+                if (p1.pad && p2.pad && p1.y === p2.y) {
+                    stroke("lime"); // highlight pad
+                    strokeWeight(3);
+                } else {
+                    stroke(255);
+                    strokeWeight(1);
+                }
+
+                line(p1.x * 14, 8 * p1.y + height,
+                    p2.x * 14, 8 * p2.y + height);
+            }
+            endShape();
+            pop();
+            push();
+            scale(2);
+            translate(xPos, yPos);
+            rotate(abs(0 - direction) <= 4 ? 0 : direction);
+            image(lunarLander, 0, 0, 30, 30 * (lunarLander.height / lunarLander.width));
+            imageMode(CORNERS);
+            if (flameLength > 0) {
+                image(flame, -5, 15 * (lunarLander.height / lunarLander.width) - 2, 5, 15 * (lunarLander.height / lunarLander.width) - 2 + flameLength + random() * 10);
+            }
+            pop();
+            // lander
+
+            push();
+            if (up) {
+                xVel += 0.005 * sin(direction);
+                yVel -= 0.005 * cos(direction);
+                if (flameLength <= 10 * (flame.height / flame.width)) {
+                    flameLength += 4
+                }
+            }
+            if (left) {
+                if (direction > -90) {
+                    direction -= 2;
+                }
+            }
+            if (right) {
+                if (direction < 90) {
+                    direction += 2;
+                }
+            }
+            xPos += xVel;
+            yPos += yVel;
+            yVel += 0.003;
+            if (flameLength > 0) {
+                flameLength -= 2;
+            }
+            pop();
+            // controls
+
+            push();
+            scale(1);
+            fill("white");
+            textSize(20)
+            textAlign(LEFT);
+            textFont(bender);
+            text("HORIZONTAL SPEED", width - 300, 100);
+
+            fill("white");
+            textSize(20)
+            textAlign(RIGHT);
+            textFont(bender);
+            text(Math.round(xVel * 20), width - 50, 100);
+
+            fill("white");
+            textSize(20)
+            textAlign(LEFT);
+            textFont(bender);
+            text("VERTICAL SPEED", width - 300, 150);
+
+            fill("white");
+            textSize(20)
+            textAlign(RIGHT);
+            textFont(bender);
+            text(Math.round(yVel * 20), width - 50, 150);
+
+            fill("white");
+            textSize(20)
+            textAlign(LEFT);
+            textFont(bender);
+            text("DIRECTION", width - 300, 200);
+
+            fill("white");
+            textSize(20);
+            textAlign(RIGHT);
+            textFont(bender);
+            text(abs(0 - direction) <= 4 ? "0" : direction, width - 50, 200);
+            pop();
+
+            push();
+            translate(width - 250, 250);
+            stroke("green");
+            line(50, -25, 50, 25);
+            rotate(direction);
+            image(lunarLander, 0, 0, 50, 50 * (lunarLander.height / lunarLander.width));
+            pop();
+
+            push();
+            translate(width - 200, 275);
+            rotate(direction);
+            if (abs(round(direction % 180)) <= 4) {
+                stroke("green")
+            } else if (abs(round(direction % 180)) <= 16) {
+                stroke("yellow")
+            } else {
+                stroke("red")
+            }
+            line(0, 0, 0, -50)
+            pop();
+            // info displays
+
+            detectCollision();
+            break;
+        case "end":
+            background(0);
+
+            push();
+            fill("white");
+            textSize(30)
+            textAlign(CENTER);
+            textFont(bender);
+
+            if (message == "perfect") {
+                text("Congratulations!", width / 2, height / 2 - 50);
+                text("Perfect landing.", width / 2, height / 2);
+                text("Humanity is proud of you.", width / 2, height / 2 + 50);
+            } else if (message == "hard") {
+                text("Hard landing.", width / 2, height / 2 - 50);
+                text("Some equipment is damaged.", width / 2, height / 2);
+                text("But humanity is still proud of you.", width / 2, height / 2 + 50);
+            } else if (message == "crash") {
+                text("Catastrophic crash.", width / 2, height / 2 - 50);
+                text("NASA is firing you.", width / 2, height / 2);
+                text("Also, you don't get a rescue mission so have fun on the moon.", width / 2, height / 2 + 50);
+            }
+            
+            pop();
     }
-    endShape();
-    pop();
-    push();
-    scale(2);
-    translate(xPos, yPos);
-    rotate(abs(0 - direction) <= 4 ? 0 : direction);
-    image(lunarLander, 0, 0, 30, 30 * (lunarLander.height / lunarLander.width));
-    imageMode(CORNERS);
-    if (flameLength > 0) {
-        image(flame, -5, 15 * (lunarLander.height / lunarLander.width) - 2, 5, 15 * (lunarLander.height / lunarLander.width) - 2 + flameLength + random() * 10);
-    }
-    pop();
-    // lander
-
-    push();
-    if (up) {
-        xVel += 0.005 * sin(direction);
-        yVel -= 0.005 * cos(direction);
-        if (flameLength <= 10 * (flame.height / flame.width)) {
-            flameLength += 4
-        }
-    }
-    if (left) {
-        if (direction > -90) {
-            direction -= 2;
-        }
-    }
-    if (right) {
-        if (direction < 90) {
-            direction += 2;
-        }
-    }
-    xPos += xVel;
-    yPos += yVel;
-    yVel += 0.003;
-    if (flameLength > 0) {
-        flameLength -= 2;
-    }
-    pop();
-    // controls
-
-    push();
-    scale(1);
-    fill("white");
-    textSize(20)
-    textAlign(LEFT);
-    textFont(bender);
-    text("HORIZONTAL SPEED", width - 300, 100);
-
-    fill("white");
-    textSize(20)
-    textAlign(RIGHT);
-    textFont(bender);
-    text(Math.round(xVel * 20), width - 50, 100);
-
-    fill("white");
-    textSize(20)
-    textAlign(LEFT);
-    textFont(bender);
-    text("VERTICAL SPEED", width - 300, 150);
-
-    fill("white");
-    textSize(20)
-    textAlign(RIGHT);
-    textFont(bender);
-    text(Math.round(yVel * 20), width - 50, 150);
-
-    fill("white");
-    textSize(20)
-    textAlign(LEFT);
-    textFont(bender);
-    text("DIRECTION", width - 300, 200);
-
-    fill("white");
-    textSize(20);
-    textAlign(RIGHT);
-    textFont(bender);
-    text(abs(0 - direction) <= 4 ? "0" : direction, width - 50, 200);
-    pop();
-
-    push();
-    translate(width - 250, 250);
-    stroke("green");
-    line(50, -25, 50, 25);
-    rotate(direction);
-    image(lunarLander, 0, 0, 50, 50 * (lunarLander.height / lunarLander.width));
-    pop();
-
-    push();
-    translate(width - 200, 275);
-    rotate(direction);
-    if (abs(round(direction % 180)) <= 4) {
-        stroke("green")
-    } else if (abs(round(direction % 180)) <= 16) {
-        stroke("yellow")
-    } else {
-        stroke("red")
-    }
-    line(0, 0, 0, -50)
-    pop();
-    // info displays
-
-    detectCollision();
 }
 
 function detectCollision() {
@@ -233,14 +320,15 @@ function detectCollision() {
                     let safeAngle = abs(direction) <= 4;
 
                     if (isPad && safeSpeed && safeAngle) {
-                        console.log("Perfect Landing");
+                        screen = "end";
+                        message = "perfect"
                     } else if (isPad && safeAngle) {
-                        console.log("Hard Landing");
+                        screen = "end";
+                        message = "hard"
                     } else {
-                        console.log("Crash");
+                        screen = "end";
+                        message = "crash"
                     }
-
-                    noLoop();
                 }
                 break;
             }
