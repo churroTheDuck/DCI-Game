@@ -4,9 +4,16 @@ var xPos = 0;
 var yPos = 0;
 var direction = 0;
 var flameLength = 0;
+
 var up = false;
 var left = false;
 var right = false;
+
+var targetUp = false;
+var targetLeft = false;
+var targetRight = false;
+
+const SIGNAL_DELAY = 500;
 let noiseOffset = 0;
 let noiseStep = 0.005;
 let terrain = [
@@ -241,26 +248,50 @@ function detectCollision() {
     }
 }
 
+function delayedSet(control, value) {
+    setTimeout(() => {
+        if (control === "up") {
+            up = value;
+        }
+        if (control === "left") {
+            left = value;
+        }
+        if (control === "right") {
+            right = value;
+        }
+    }, SIGNAL_DELAY);
+}
+
 function keyPressed() {
     if (keyCode == UP_ARROW) {
-        up = true;
+        targetUp = true;
+        delayedSet("up", true);
     }
+
     if (keyCode == LEFT_ARROW) {
-        left = true;
+        targetLeft = true;
+        delayedSet("left", true);
     }
+
     if (keyCode == RIGHT_ARROW) {
-        right = true;
+        targetRight = true;
+        delayedSet("right", true);
     }
 }
 
 function keyReleased() {
     if (keyCode == UP_ARROW) {
-        up = false;
+        targetUp = false;
+        delayedSet("up", false);
     }
+
     if (keyCode == LEFT_ARROW) {
-        left = false;
+        targetLeft = false;
+        delayedSet("left", false);
     }
+
     if (keyCode == RIGHT_ARROW) {
-        right = false;
+        targetRight = false;
+        delayedSet("right", false);
     }
 }
